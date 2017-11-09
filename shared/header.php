@@ -231,7 +231,7 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 	<!-- banner -->
 	<div class="banner banner10">
 		<div class="container">
-			<h2><?php= isset($PageTitle) ? $PageTitle : "Default Title"?></h2>
+			<h2><?= isset($PageTitle) ? $PageTitle : "Default Title"?></h2>
 		</div>
 	</div>
 	<!-- //banner -->   
