@@ -1,3 +1,8 @@
+<?php 
+//start session
+session_start();
+?>
+
 <!--
 Author: W3layouts
 Author URL: http://w3layouts.com
@@ -33,6 +38,14 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 <!-- for bootstrap working -->
 <script type="text/javascript" src="js/bootstrap-3.1.1.min.js"></script>
 <!-- //for bootstrap working -->
+<!-- for bootstrap sweetalert -->
+<link href="css/sweet-alert.css" rel="stylesheet"> 
+<script type="text/javascript" src="js/sweet-alert.min.js"></script>
+<!-- //for bootstrap sweetalert -->
+<!-- for jquery validation -->
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.additional-methods.min.js"></script>
+<!-- //for jquery validation -->
 <!-- start-smooth-scrolling -->
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
@@ -42,7 +55,23 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 		});
 	});
 </script>
-<!-- //end-smooth-scrolling --> 
+<!-- //end-smooth-scrolling -->
+<!-- custom css -->
+<style type="text/css">
+div.error{
+	color:red;
+}
+div.ts-user-info-icon{
+	float: left;
+}
+div.w3l_logo{
+	margin-left:14em;
+}
+div.w3l_login{
+	margin-right:7em;
+}
+</style>
+<!-- //custom css -->
 </head> 
 <body> 
 	<!-- header modal -->
@@ -67,9 +96,9 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 									<div class="tab-1 resp-tab-content" aria-labelledby="tab_item-0">
 										<div class="facts">
 											<div class="register">
-												<form action="#" method="post">			
-													<input name="Email" placeholder="Email Address" type="text" required="">						
-													<input name="Password" placeholder="Password" type="password" required="">										
+												<form id="frmSignin">			
+													<input name="txtUsername" id="txtUsername" placeholder="Email Address" maxlength="128" type="text" data-rule-required="true">						
+													<input name="txtUserPass" id="txtUserPass" placeholder="Password" maxlength="20" type="password" data-rule-required="true">										
 													<div class="sign-up">
 														<input type="submit" value="Sign in"/>
 													</div>
@@ -80,11 +109,11 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 									<div class="tab-2 resp-tab-content" aria-labelledby="tab_item-1">
 										<div class="facts">
 											<div class="register">
-												<form action="#" method="post">			
-													<input placeholder="Name" name="Name" type="text" required="">
-													<input placeholder="Email Address" name="Email" type="email" required="">	
-													<input placeholder="Password" name="Password" type="password" required="">	
-													<input placeholder="Confirm Password" name="Password" type="password" required="">
+												<form id="frmSignup" action="#" method="post">
+													<input placeholder="Name" name="txtName" maxlength="256" id="txtName" type="text">
+													<input placeholder="Email Address" id="txtEmail" maxlength="128" name="txtEmail" type="email">	
+													<input placeholder="Enter Password" name="txtPassword" maxlength="20" id="txtPassword" type="password">	
+													<input placeholder="Confirm Password" name="txtCnfPassword" id="txtCnfPassword" type="password">
 													<div class="sign-up">
 														<input type="submit" value="Create Account"/>
 													</div>
@@ -102,7 +131,147 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 										width: 'auto', //auto or any width like 600px
 										fit: true   // 100% fit in a container
 									});
+									
+									//register form validation
+									$('#frmSignup').validate({
+										errorElement: 'div',
+										rules: {
+											txtName: {
+												required: true,
+												minlength: 2,
+												maxlength: 256
+											},
+											txtEmail: {
+												required: true,
+												email: true,
+												maxlength: 128
+											},
+											txtPassword: {
+												required: true,
+												minlength: 4,
+												maxlength: 20
+											},
+											txtCnfPassword: {
+												equalTo: '#txtPassword'
+											}
+										},
+										messages: {
+											txtCnfPassword:{
+												equalTo: 'Password and confirm password must match.'
+											}
+										}
+									});
+									
+									$('#frmSignup').on('submit',function(e){fun_CreateUser(e)});
+									
+									//signin form validation
+									$('#frmSignin').validate({
+										errorElement: 'div'
+									});
+									
+									$('#frmSignin').on('submit',function(e){fun_Signin(e)});
 								});
+								
+								function fun_CreateUser(ev){
+									ev.preventDefault();
+									if($('#frmSignup').valid()===true){
+										$.ajax({
+											type: "POST",
+											url: "api/account_api.php",
+											data: JSON.stringify({
+												fn: 'CreateUser',
+												name: $('#txtName').val(),
+												email: $('#txtEmail').val(),
+												password: $('#txtPassword').val()
+											}),
+											contentType: 'application/json; charset=utf-8',
+											dataType: 'json',
+											success: function (response) {
+												if (typeof response.d !== 'undefined' && response.d !== null) {
+													response = response.d;
+												}
+												if(response.status === true){
+													sweetAlert('Done!','Account created! Use your credentials for login.','success');
+													
+													//reset input
+													$('#txtName').val('');
+													$('#txtEmail').val('');
+													$('#txtPassword').val('');
+													$('#txtCnfPassword').val('');
+													
+													//close modal
+													$('#myModal88').modal('hide');
+												}else{
+													if(typeof response.data !== 'undefined' && response.data instanceof Array && response.data.length > 0){
+														var msg = '';
+														$.each(response.data,function(i,it){
+															msg += it + '<br/>';
+														});
+														sweetAlert({
+															title: 'Validation Error!',
+															type: 'warning',
+															text: msg,
+															html: true
+														});
+													}else{
+														sweetAlert('Oops...','Please try again after sometime.','error');
+													}
+												}
+											},
+											error: function (response) {
+												sweetAlert('Oops...','Please try again after sometime.','error');
+											}
+										});
+									}
+									
+									return false;
+								}
+								
+								function fun_Signin(ev){
+									ev.preventDefault();
+									if($('#frmSignin').valid()===true){
+										$.ajax({
+											type: "POST",
+											url: "api/account_api.php",
+											data: JSON.stringify({
+												fn: 'LoginUser',
+												email: $('#txtUsername').val(),
+												password: $('#txtUserPass').val()
+											}),
+											contentType: 'application/json; charset=utf-8',
+											dataType: 'json',
+											success: function (response) {
+												if (typeof response.d !== 'undefined' && response.d !== null) {
+													response = response.d;
+												}
+												if(response.status === true){
+													//reload
+													window.location.reload();
+												}else{
+													if(typeof response.data !== 'undefined' && response.data instanceof Array && response.data.length > 0){
+														var msg = '';
+														$.each(response.data,function(i,it){
+															msg += it + '<br/>';
+														});
+														sweetAlert({
+															title: 'Validation Error!',
+															type: 'warning',
+															text: msg,
+															html: true
+														});
+													}else{
+														sweetAlert('Oops...',response.message,'error');
+													}
+												}
+											},
+											error: function (response) {
+												sweetAlert('Oops...','Please try again after sometime.','error');
+											}
+										});
+									}
+									
+									return false;
+								}
 							</script>
 							<div id="OR" class="hidden-xs">OR</div>
 						</div>
@@ -130,9 +299,15 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 	<!-- header -->
 	<div class="header" id="home1">
 		<div class="container">
-			<div class="w3l_login">
-				<a href="#" data-toggle="modal" data-target="#myModal88"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></a>
-			</div>
+			<?php if(isset($_SESSION['name'])){ ?>
+				<div class="ts-user-info-icon">
+					Hi, <a style="font-weight:bolder;"><?=substr($_SESSION['name'],0,strpos($_SESSION['name'],' '))?></a>. &nbsp;&nbsp;<a href="api/account_api.php?fn=Logout">Logout</a>
+				</div>
+			<?php } else { ?>
+				<div class="w3l_login">
+					<a href="#" data-toggle="modal" data-target="#myModal88"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></a>
+				</div>
+			<?php } ?>
 			<div class="w3l_logo">
 				<h1><a href="index.html">Electronic Store<span>Your stores. Your place.</span></a></h1>
 			</div>
