@@ -1,0 +1,6 @@
+#Set 404 error page
+ErrorDocument 404 /eStore/404.php
+#Hide resources with names which starts from .
+RedirectMatch 404 /\.
+#Disable file indexing
+Options -Indexes
