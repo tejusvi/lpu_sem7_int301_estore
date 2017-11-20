@@ -16,8 +16,7 @@ include_once('./shared/header.php');
 			<div class="agile_mail_grids">
 				<div class="col-md-5 contact-left">
 					<h4>Address</h4>
-					<p>est eligendi optio cumque nihil impedit quo minus id quod maxime
-						<span>26 56D Rescue,US</span></p>
+					<p>21 Model Town,Jalandhar,Punjab 					<span>26 56D Rescue,US</span></p>
 					<ul>
 						<li>Free Phone :+1 078 4589 2456</li>
 						<li>Telephone :+1 078 4589 2456</li>
