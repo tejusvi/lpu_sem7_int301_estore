@@ -14,7 +14,7 @@ class Database{
 	private static $servername = "localhost";
 	private static $username = "estore_web";
 	private static $password = "xFnzegXFGwPFCR5y";
-	private static $dbname = "eStore";
+	private static $dbname = "estore";
 	public function getConnection(){
 		$conn = null;
 		try{
